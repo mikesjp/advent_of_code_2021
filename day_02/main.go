@@ -16,6 +16,7 @@ func main() {
 
 	var horizontalPosition int
 	var depth int
+	aim := 0
 
 	for _, input := range inputs {
 
@@ -24,14 +25,17 @@ func main() {
 		value, _ := strconv.Atoi(split[1])
 		switch (instruction) {
 			case "down":
-				depth += value
+				// depth += value // commented out for part 2
 			case "up":
-				depth -= value
+				// depth -= value // commented out for part 2
+				aim -= value
 			case "forward":
 				horizontalPosition += value
+				if aim != 0 {
+					depth += aim * value
+				}
 		}
 	}
-
 	fmt.Println(horizontalPosition * depth)
 }
 
