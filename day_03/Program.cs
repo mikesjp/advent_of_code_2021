@@ -1,76 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
-// int gammaRate;
-// int episolonRate;
+List<string> binaryNumbers = File.ReadAllLines("./data.txt").ToList();
 
-// int powerConsumption = gammaRate * episolonRate;
+(string gammaValue, string epsilonValue) = CalculateDecimalValue(binaryNumbers);
 
-// 10110 == 22
+int g = Convert.ToInt32(gammaValue, 2);
+int e = Convert.ToInt32(epsilonValue, 2);
 
-List<string> binaryNumbers = new List<string>
+// int epsilon = ~gamma & 0x0000000F; // This didn't work :(
+
+Console.WriteLine($"Power Consumption = {g * e}");
+
+(string, string) CalculateDecimalValue(List<string> values)
 {
-    "00100",
-    "11110",
-    "10110",
-    "10111",
-    "10101",
-    "01111",
-    "00111",
-    "11100",
-    "10000",
-    "11001",
-    "00010",
-    "01010"
-};
+    int count = values[0].Length;
+    int counter = 0;
+    string gamma = string.Empty;
+    string epsilon = string.Empty;
 
-CalculateGammaRate(binaryNumbers);
-
-
-int CalculateGammaRate(List<string> values)
-{
-    if (values.Count == 0)
+    while (counter != count)
     {
-        return 0;
+        var sigma = values
+            .Select(v => new { Value = v, Index = counter }) // loop each value in list, looking at index from 0 - value.Length.
+            .GroupBy(c => c.Value[counter]) // Re-work value to read first index of first value, then first index of second value etc.
+            .Select(c => new { Char = c.Key, Count = c.Count() })
+            .Aggregate((a, b) => a.Count > b.Count ? a : b);
+
+        gamma += sigma.Char;
+        epsilon += sigma.Char.Equals('0') ? 1 : 0;
+        counter++;
     }
 
-    // Find number of digits in number. This assumes all numbers in the list
-    // are the same length.
-    int numberOfDigits = values[0].Length;
-
-    int[] onesBitCount = new int[numberOfDigits];
-    int[] zeroesBitCount = new int[numberOfDigits];
-
-    foreach (string value in values)
-    {
-        for (int i = 0; i < value.Length; i++)
-        {
-            if (value[i].Equals('0'))
-            {
-                zeroesBitCount[i] += 1;
-            }
-            else
-            {
-                onesBitCount[i] += 1;
-            }
-        }
-    }
-    
-    string gammaRate = string.Empty;
-    for (int i = 0; i < numberOfDigits; i++)
-    {
-        int zeroValue = Convert.ToInt32(zeroesBitCount[i]);
-        int oneValue = Convert.ToInt32(onesBitCount[i]);
-        if (zeroValue > oneValue)
-        {
-            gammaRate += "0";
-        }
-        else
-        {
-            gammaRate += "1";
-        }
-    }
-
-    Console.WriteLine(gammaRate);
-    return 2;
+    return (gamma, epsilon);
 }
